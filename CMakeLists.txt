@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.12)
 project(DynaSLAM)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -7,6 +7,11 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/conan/")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/conan/")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O3 -march=native ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O3 -march=native")
@@ -31,6 +36,7 @@ else()
 endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 message("PROJECT_SOURCE_DIR: " ${OpenCV_DIR})
 find_package(OpenCV 2.4.11 QUIET)
@@ -63,7 +69,7 @@ else()
     message("PYTHON LIBS DIRECTORY: " ${PYTHON_LIBRARY})
 endif()
 
-find_package(Boost REQUIRED COMPONENTS thread)
+find_package(Boost REQUIRED)
 if(Boost_FOUND)
     message("Boost was found!")
     message("Boost Headers DIRECTORY: " ${Boost_INCLUDE_DIRS})
@@ -74,16 +80,16 @@ endif()
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 
-set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS} /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy)
+set(PYTHON_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS} /home/shnekam/.local/lib/python2.7/site-packages/numpy/core/include/numpy)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
 ${EIGEN3_INCLUDE_DIR}
-${Pangolin_INCLUDE_DIRS}
+${Pangolin_INCLUDE_DIR}
 /usr/include/python2.7/
-/usr/lib/python2.7/dist-packages/numpy/core/include/numpy/
-${Boost_INCLUDE_DIRS}
+/home/shnekam/.local/lib/python2.7/site-packages/numpy/core/include/numpy
+#${Boost_INCLUDE_DIRS}
 )
 message("PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -114,13 +120,19 @@ src/Geometry.cc
 )
 
 target_link_libraries(${PROJECT_NAME}
-${OpenCV_LIBS}
+  opencv::opencv_calib3d
+  opencv::opencv_core
+  opencv::opencv_features2d
+  opencv::opencv_highgui
+  opencv::opencv_imgproc
+  opencv::opencv_imgcodecs
 ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
 /usr/lib/x86_64-linux-gnu/libpython2.7.so
-${Boost_LIBRARIES}
+Boost::boost
+Boost::thread
 )
 
 # Build examples
@@ -147,7 +159,6 @@ add_executable(mono_kitti
 Examples/Monocular/mono_kitti.cc)
 target_link_libraries(mono_kitti ${PROJECT_NAME})
 
-add_executable(mono_carla
-Examples/Monocular/mono_carla.cc)
-target_link_libraries(mono_carla ${PROJECT_NAME})
+#add_executable(mono_carla Examples/Monocular/mono_carla.cc)
+#target_link_libraries(mono_carla ${PROJECT_NAME})
 

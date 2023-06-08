@@ -1,0 +1,7 @@
+[requires]
+opencv/3.4.17
+boost/1.72.0
+zlib/1.2.12
+
+[generators]
+cmake_find_package_multi
