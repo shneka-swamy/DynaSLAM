@@ -1,3 +1,24 @@
+# Modifications
+
+- Install ORB-SLAM2 prerequisites: C++11 or C++0x Compiler, Pangolin, Conan (v1.x) and Eigen3 (https://github.com/raulmur/ORB_SLAM2).
+
+Steps to run:
+```
+cmake --preset Release
+cmake --build cmake-build-release -j 12
+```
+or
+```
+cmake -S . -B cmake-build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build cmake-build-release -j 12
+```
+
+To list all presets:
+```
+cmake --list-presets
+```
+
+
 # DynaSLAM
 
 [[Project]](https://bertabescos.github.io/DynaSLAM/)   [[arXiv]](https://arxiv.org/abs/1806.05620)   [[Journal]](https://ieeexplore.ieee.org/document/8421015)

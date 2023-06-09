@@ -47,3 +47,14 @@ Examples/Monocular/CARLA_KITTI04-12.yaml
 Thirdparty/DBoW2/.cache/
 Thirdparty/g2o/.cache/
 .cache/
+
+compile_commands.json
+
+src/python/*.png
+
+cmake-build-debug/
+cmake-build-release/
+cmake-clang-debug/
+cmake-clang-release/
+
+CMakeUserPresets.json

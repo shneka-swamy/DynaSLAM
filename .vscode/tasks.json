@@ -1,0 +1,28 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Debug Build",
+			"type": "cmake",
+			"command": "build",
+			"preset": "Debug",
+			"options": {
+				"cwd": "${workspaceFolder}/cmake-build-debug"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Release Build",
+			"type": "cmake",
+			"command": "build",
+			"preset": "Release",
+			"options": {
+				"cwd": "${workspaceFolder}/cmake-build-release"
+			},
+			"group": "build"
+		}
+	]
+}
