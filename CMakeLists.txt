@@ -197,6 +197,8 @@ compile(stereo_kitti Examples/Stereo/stereo_kitti.cc)
 
 compile(mono_tum Examples/Monocular/mono_tum.cc)
 
+compile(mono_tum_dup Examples/Monocular/mono_tum_dup.cc)
+
 compile(mono_kitti Examples/Monocular/mono_kitti.cc)
 
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Vocabulary/ORBvoc.txt")

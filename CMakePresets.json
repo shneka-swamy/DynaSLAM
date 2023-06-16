@@ -9,6 +9,7 @@
     {
       "name": "Debug",
       "description": "Debug configuration",
+      "generator": "Ninja",
       "hidden": false,
       "binaryDir": "${sourceDir}/cmake-build-debug",
       "cacheVariables": {
@@ -18,6 +19,7 @@
     {
       "name": "Release",
       "description": "Release configuration",
+      "generator": "Ninja",
       "hidden": false,
       "binaryDir": "${sourceDir}/cmake-build-release",
       "cacheVariables": {
