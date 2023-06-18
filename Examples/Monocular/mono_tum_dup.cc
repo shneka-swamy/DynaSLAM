@@ -36,7 +36,9 @@ int main(int argc, char **argv)
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
     string strFile = string(argv[3])+"/rgb.txt";
+    std::cout << "Loading Images " << strFile << std::endl;
     LoadImages(strFile, vstrImageFilenames, vTimestamps);
+    std::cout << "Images Loaded" << std::endl;
 
     int nImages = vstrImageFilenames.size();
 

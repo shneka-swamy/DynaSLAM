@@ -19,6 +19,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O3 -march=native")
 
 add_definitions("-std=c++11")
 
+option(DOCKER_ENVIRONMENT "Get dependencies using conan" OFF)
+
+if (NOT DOCKER_ENVIRONMENT)
+
 if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan/")
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/conan/")
 endif()
@@ -53,6 +57,8 @@ conan_cmake_install(
   REMOTE conancenter
   SETTINGS ${settings}
   )
+
+endif()
 
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall  -O0 -march=native ")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall   -O0 -march=native")
@@ -116,7 +122,44 @@ endif()
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 
-list(APPEND PYTHON_INCLUDE_DIR "$ENV{HOME}/.local/lib/python2.7/site-packages/numpy/core/include/numpy")
+    
+if (NOT DOCKER_ENVIRONMENT)
+  set (OPENCV_LIBRARIES 
+    opencv::opencv_calib3d
+    opencv::opencv_core
+    opencv::opencv_features2d
+    opencv::opencv_highgui
+    opencv::opencv_imgproc
+    opencv::opencv_imgcodecs
+  )
+  set (BOOST_LIBRARIES 
+    Boost::boost
+    Boost::thread)
+
+  list(APPEND PYTHON_INCLUDE_DIR "$ENV{HOME}/.local/lib/python2.7/site-packages/numpy/core/include/numpy")
+else()
+
+find_package(Boost REQUIRED COMPONENTS system thread)
+if(Boost_FOUND)
+    message("Boost was found!")
+    message("Boost Headers DIRECTORY: " ${Boost_INCLUDE_DIRS})
+    message("Boost LIBS DIRECTORY: " ${Boost_LIBRARY_DIRS})
+    message("Found Libraries: " ${Boost_LIBRARIES})
+endif()
+
+  set (OPENCV_INCLUDE_DIRS 
+    ${OpenCV_INCLUDE_DIRS})
+  set (OPENCV_LIBRARIES 
+    ${OpenCV_LIBS}
+  )
+  set (BOOST_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS} )
+  set (BOOST_LIBRARIES
+    ${Boost_LIBRARIES}
+  )
+  
+  list(APPEND PYTHON_INCLUDE_DIR "/usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy")
+endif()
 
 #/usr/include/python2.7/
 #/home/pecs/.local/lib/python2.7/site-packages/numpy/core/include/numpy
@@ -153,27 +196,24 @@ function(compile targetName cppFiles)
     ${PROJECT_SOURCE_DIR}/include
     )
 
+
   target_include_directories(${targetName} SYSTEM PUBLIC
     ${EIGEN3_INCLUDE_DIR}
     ${Pangolin_INCLUDE_DIR}
     ${PYTHON_INCLUDE_DIR}
+    ${OPENCV_INCLUDE_DIRS}
+    ${BOOST_INCLUDE_DIRS}
     )
 
   target_link_libraries(${targetName} PUBLIC
-    opencv::opencv_calib3d
-    opencv::opencv_core
-    opencv::opencv_features2d
-    opencv::opencv_highgui
-    opencv::opencv_imgproc
-    opencv::opencv_imgcodecs
+    ${OPENCV_LIBRARIES}
     ${EIGEN3_LIBS}
     ${Pangolin_LIBRARIES}
     DBoW2
     g2o
     ${PYTHON_INCLUDE_DIR}
     /usr/lib/x86_64-linux-gnu/libpython2.7.so
-    Boost::boost
-    Boost::thread
+    ${BOOST_LIBRARIES}
     )
 
   set_target_properties(${targetName}

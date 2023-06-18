@@ -20,13 +20,12 @@ add_library(DBoW2
   DUtils/Random.cpp
   DUtils/Timestamp.cpp)
 
+target_include_directories(DBoW2 PUBLIC
+    ${OPENCV_INCLUDE_DIRS}
+  )
+
 target_link_libraries(DBoW2 PUBLIC
-  opencv::opencv_calib3d
-  opencv::opencv_core
-  opencv::opencv_features2d
-  opencv::opencv_highgui
-  opencv::opencv_imgproc
-  opencv::opencv_imgcodecs
+   ${OPENCV_LIBRARIES}
   )
 
 set_target_properties(DBoW2
