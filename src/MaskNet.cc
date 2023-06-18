@@ -13,6 +13,8 @@
 #include <dirent.h>
 #include <errno.h>
 
+using namespace std;
+
 namespace DynaSLAM
 {
 
@@ -55,6 +57,7 @@ SegmentDynObject::~SegmentDynObject(){
 }
 
 cv::Mat SegmentDynObject::GetSegmentation(cv::Mat &image,std::string dir, std::string name){
+    cout<<dir + "/" + name<<endl;
     cv::Mat seg = cv::imread(dir+"/"+name,CV_LOAD_IMAGE_UNCHANGED);
     if(seg.empty()){
         PyObject* py_image = cvt->toNDArray(image.clone());
