@@ -101,7 +101,7 @@ int main(int argc, char **argv)
             cv::dilate(maskRCNN,maskRCNNdil, kernel);
             mask = mask - maskRCNNdil;
             cv::imshow("mask",mask);
-            cv::imshow("maskRCNN",maskRCNN);
+            cv::imshow("maskRCNN",maskRCNNdil);
             cv::waitKey();
             cv::destroyAllWindows();
         
