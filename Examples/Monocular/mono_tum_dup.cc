@@ -100,13 +100,6 @@ int main(int argc, char **argv)
             cv::Mat maskRCNNdil = maskRCNN.clone();
             cv::dilate(maskRCNN,maskRCNNdil, kernel);
             mask = mask - maskRCNNdil;
-            cv::imshow("mask",mask);
-            cv::imshow("maskRCNN",maskRCNNdil);
-            cv::waitKey();
-            cv::destroyAllWindows();
-        
-        // TODO: added for checking
-        break;
         }
 
         // Pass the image to the SLAM system
