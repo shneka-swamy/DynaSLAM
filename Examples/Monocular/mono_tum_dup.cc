@@ -104,6 +104,9 @@ int main(int argc, char **argv)
             cv::imshow("maskRCNN",maskRCNN);
             cv::waitKey();
             cv::destroyAllWindows();
+        
+        // TODO: added for checking
+        break;
         }
 
         // Pass the image to the SLAM system
