@@ -68,15 +68,13 @@ std::vector<std::tuple<int, int, int, int>> templateMatching(cv::Mat frame, cv::
     cv::Mat frame_gray, source_gray;
     cv::cvtColor(frame, frame_gray, cv::COLOR_RGB2GRAY);
     cv::cvtColor(source, source_gray, cv::COLOR_RGB2GRAY);
-    cv::Mat mask = source_gray * 255;
 
     for (const auto& box : boxes) {
         int x, y, w, h;
         std::tie(x, y, w, h) = box;
         cv::Mat templateImage = source_gray(cv::Range(y, h), cv::Range(x, w));
-        cv::Mat templateMask = mask(cv::Range(y, h), cv::Range(x, w));
         cv::Mat res;
-        cv::matchTemplate(frame_gray, templateImage, res, cv::TM_CCOEFF_NORMED, templateMask);
+        cv::matchTemplate(frame_gray, templateImage, res, cv::TM_CCOEFF_NORMED);
         double min_val, max_val;
         cv::Point min_loc, max_loc;
         cv::minMaxLoc(res, &min_val, &max_val, &min_loc, &max_loc);
@@ -97,7 +95,7 @@ std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecision
     assert(boxThreshold > 0);
     assert(boxThreshold <= 1);
 
-    std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecision = [& ](std::vector<std::tuple<int, int, int, int>> lastBoxes) {
+    std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecision = [framesThreshold, boxThreshold, &frame_count, &previousBoxes ](std::vector<std::tuple<int, int, int, int>> lastBoxes) {
         assert(framesThreshold > 0);
         assert(boxThreshold > 0);
         assert(boxThreshold <= 1);
