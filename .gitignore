@@ -51,6 +51,8 @@ Thirdparty/g2o/.cache/
 compile_commands.json
 
 src/python/*.png
+src/*.png
+*.png
 
 cmake-build-debug/
 cmake-build-release/
