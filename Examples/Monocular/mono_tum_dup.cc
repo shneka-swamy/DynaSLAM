@@ -93,8 +93,14 @@ std::vector<std::tuple<int, int, int, int>> templateMatching(cv::Mat frame, cv::
 std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecisionGen(int framesThreshold, double boxThreshold) {
     int frame_count = -1;
     int previousBoxes = 0;
+    assert(framesThreshold > 0);
+    assert(boxThreshold > 0);
+    assert(boxThreshold <= 1);
 
     std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecision = [& ](std::vector<std::tuple<int, int, int, int>> lastBoxes) {
+        assert(framesThreshold > 0);
+        assert(boxThreshold > 0);
+        assert(boxThreshold <= 1);
         frame_count = (frame_count + 1) % framesThreshold;
 
         if (frame_count == 0 || lastBoxes.size() < boxThreshold * previousBoxes) {
