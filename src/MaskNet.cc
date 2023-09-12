@@ -58,7 +58,7 @@ SegmentDynObject::~SegmentDynObject(){
 
 cv::Mat SegmentDynObject::GetSegmentation(cv::Mat &image,std::string dir, std::string name){
     // TODO: added for checking
-    cout<<dir + "/" + name<<endl;
+    //cout<<dir + "/" + name<<endl;
     cv::Mat seg = cv::imread(dir+"/"+name,CV_LOAD_IMAGE_UNCHANGED);
     if(seg.empty()){
         PyObject* py_image = cvt->toNDArray(image.clone());

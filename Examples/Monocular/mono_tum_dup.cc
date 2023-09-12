@@ -51,6 +51,7 @@ std::vector<std::tuple<int, int, int, int>> boundingSegmentation(cv::Mat segment
 
 cv::Mat createMaskFromBoxes(const std::vector<std::tuple<int, int, int, int>>& boxes) {
     cv::Mat mask = cv::Mat::zeros(480, 640, CV_8U);
+    // cout << "boxes size: " << boxes.size() << endl;
 
     for (const auto& box : boxes) {
         int x, y, w, h;
@@ -88,21 +89,28 @@ std::vector<std::tuple<int, int, int, int>> templateMatching(cv::Mat frame, cv::
     return new_boxes;
 }
 
-std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecisionGen(int framesThreshold, double boxThreshold) {
-    int frame_count = -1;
-    int previousBoxes = 0;
-    assert(framesThreshold > 0);
-    assert(boxThreshold > 0);
-    assert(boxThreshold <= 1);
-
-    std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecision = [framesThreshold, boxThreshold, &frame_count, &previousBoxes ](std::vector<std::tuple<int, int, int, int>> lastBoxes) {
+class SegmentDecisionGen {
+    private:
+        int framesThreshold;
+        double boxThreshold;
+        int frameCount;
+        int previousBoxes;
+    public:
+    SegmentDecisionGen(int framesThreshold, double boxThreshold) : framesThreshold(framesThreshold), boxThreshold(boxThreshold),
+    frameCount(-1), previousBoxes(0) {
         assert(framesThreshold > 0);
         assert(boxThreshold > 0);
         assert(boxThreshold <= 1);
-        frame_count = (frame_count + 1) % framesThreshold;
+    }
 
-        if (frame_count == 0 || lastBoxes.size() < boxThreshold * previousBoxes) {
-            frame_count = 0;
+    bool segmentDecision(const std::vector<std::tuple<int, int, int, int>>& lastBoxes) {
+        assert(framesThreshold > 0);
+        assert(boxThreshold > 0);
+        assert(boxThreshold <= 1);
+        frameCount = (frameCount + 1) % framesThreshold;
+
+        if (frameCount == 0 || lastBoxes.size() < boxThreshold * previousBoxes) {
+            frameCount = 0;
             previousBoxes = lastBoxes.size();
             return true;
         }
@@ -111,8 +119,7 @@ std::function<bool(std::vector<std::tuple<int, int, int, int>>)> segmentDecision
         return false;
     };
 
-    return segmentDecision;
-}
+};
 
 int main(int argc, char **argv)
 {
@@ -122,10 +129,10 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    int framesThreshold = 20;
+    int framesThreshold = 10;
     double boxThreshold = 0.9;
 
-    auto segDecision = segmentDecisionGen(framesThreshold, boxThreshold);
+    //auto segDecision = SegmentDecisionGen(framesThreshold, boxThreshold);
 
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
@@ -151,6 +158,10 @@ int main(int argc, char **argv)
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
     vTimesTrack.resize(nImages);
+
+    // Vector for segmentation time statistics
+    vector<double> vTimesSeg(nImages);
+    std::vector<double> vTimesMono(nImages);
 
     cout << endl << "-------" << endl;
     cout << "Start processing sequence ..." << endl;
@@ -191,7 +202,9 @@ int main(int argc, char **argv)
         cv::Mat mask; // = cv::Mat::ones(480,640,CV_8U);
         std::vector<std::tuple<int, int, int, int>> boxes;
         
-        if (segDecision(prevBoxes)) {
+        auto ifstart = std::chrono::steady_clock::now();
+
+        if (true) { //segDecision.segmentDecision(prevBoxes)) {
             cv::Mat maskRCNN = MaskNet->GetSegmentation(im,string(argv[4]),vstrImageFilenames[ni].replace(0,4,"")); //0 background y 1 foreground
             mask = segment(maskRCNN, kernel);
             boxes = boundingSegmentation(mask);
@@ -199,11 +212,19 @@ int main(int argc, char **argv)
             boxes = templateMatching(im, prevImage, prevBoxes);
             mask = createMaskFromBoxes(boxes);
         }
-
+        auto ifend = std::chrono::steady_clock::now();
+        auto ifduration = std::chrono::duration_cast<std::chrono::duration<double> >(ifend - ifstart);
+        vTimesSeg[ni] = ifduration.count();
         
-
+        auto trackStart = std::chrono::steady_clock::now();
         // Pass the image to the SLAM system
         SLAM.TrackMonocular(im, mask, tframe);
+        auto trackEnd = std::chrono::steady_clock::now();
+        auto trackDuration = std::chrono::duration_cast<std::chrono::duration<double> >(trackEnd - trackStart);
+        vTimesMono[ni] = trackDuration.count();
+
+        // print time with 5.3f precision
+        std::cout << "IfBlock Time " << std::fixed << std::setprecision(5) << ifduration.count() << " , MonoBlock " << std::fixed << std::setprecision(5) << trackDuration.count() << std::endl;
 
 #ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
@@ -242,6 +263,12 @@ int main(int argc, char **argv)
     cout << "-------" << endl << endl;
     cout << "median tracking time: " << vTimesTrack[nImages/2] << endl;
     cout << "mean tracking time: " << totaltime/nImages << endl;
+
+    auto ifmean = std::accumulate(vTimesSeg.begin(), vTimesSeg.end(), 0.0) / vTimesSeg.size();
+    auto trackmean = std::accumulate(vTimesMono.begin(), vTimesMono.end(), 0.0) / vTimesTrack.size();
+
+    std::cout << "IfBlock Time " << ifmean << " ms" << std::endl;
+    std::cout << "Track Time " << trackmean << " ms" << std::endl;
 
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
