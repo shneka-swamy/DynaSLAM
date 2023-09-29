@@ -11,7 +11,7 @@ import coco
 import utils
 import model as modellib
 
-print 'Initializing Mask RCNN network...'
+print('Initializing Mask RCNN network...')
 # Root directory of the project
 ROOT_DIR = os.getcwd()
 ROOT_DIR = "./src/python"
@@ -53,7 +53,7 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
        'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
        'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
        'teddy bear', 'hair drier', 'toothbrush']
-print 'Initialated Mask RCNN network...'
+print('Initialated Mask RCNN network...')
 
 def GetDynSeg(image,image2=None):
 	h = image.shape[0]

@@ -58,9 +58,9 @@ SegmentDynObject::~SegmentDynObject(){
 
 cv::Mat SegmentDynObject::GetSegmentation(cv::Mat &image,std::string dir, std::string name){
     // TODO: added for checking
-    //cout<<dir + "/" + name<<endl;
+    // cout<<dir + "/" + name<<endl;
     cv::Mat seg = cv::imread(dir+"/"+name,CV_LOAD_IMAGE_UNCHANGED);
-    if(seg.empty()){
+    if(seg.empty() || true){
         PyObject* py_image = cvt->toNDArray(image.clone());
         assert(py_image != NULL);
         PyObject* py_mask_image = PyObject_CallMethod(this->net, const_cast<char*>(this->get_dyn_seg.c_str()),"(O)",py_image);
@@ -86,6 +86,10 @@ cv::Mat SegmentDynObject::GetSegmentation(cv::Mat &image,std::string dir, std::s
 
 void SegmentDynObject::ImportSettings(){
     std::string strSettingsFile = "./Examples/RGB-D/MaskSettings.yaml";
+    // assert that the file exists
+    std::ifstream f(strSettingsFile.c_str());
+    assert(f.good());
+    f.close();
     cv::FileStorage fs(strSettingsFile.c_str(), cv::FileStorage::READ);
     fs["py_path"] >> this->py_path;
     fs["module_name"] >> this->module_name;

@@ -138,6 +138,16 @@ int main(int argc, char **argv)
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
     string strFile = string(argv[3])+"/rgb.txt";
+    // make sure the file exists
+    std::ifstream f(strFile.c_str());
+    assert(f.good());
+    if (f.is_open()) {
+        f.close();
+    }
+    else {
+        std::cout << "File not found: " << strFile << std::endl;
+        return 1;
+    }
     std::cout << "Loading Images " << strFile << std::endl;
     LoadImages(strFile, vstrImageFilenames, vTimestamps);
     std::cout << "Images Loaded" << std::endl;
@@ -151,9 +161,8 @@ int main(int argc, char **argv)
     MaskNet = new DynaSLAM::SegmentDynObject();
     cout << "Mask R-CNN loaded!" << endl;
 
-
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,true);
+    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,false);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -199,7 +208,7 @@ int main(int argc, char **argv)
 #endif
 
         // Segment out the images
-        cv::Mat mask; // = cv::Mat::ones(480,640,CV_8U);
+        cv::Mat mask = cv::Mat::ones(480,640,CV_8U);
         std::vector<std::tuple<int, int, int, int>> boxes;
         
         auto ifstart = std::chrono::steady_clock::now();
@@ -267,8 +276,8 @@ int main(int argc, char **argv)
     auto ifmean = std::accumulate(vTimesSeg.begin(), vTimesSeg.end(), 0.0) / vTimesSeg.size();
     auto trackmean = std::accumulate(vTimesMono.begin(), vTimesMono.end(), 0.0) / vTimesTrack.size();
 
-    std::cout << "IfBlock Time " << ifmean << " ms" << std::endl;
-    std::cout << "Track Time " << trackmean << " ms" << std::endl;
+    std::cout << "IfBlock Time " << ifmean << " s" << std::endl;
+    std::cout << "Track Time " << trackmean << " s" << std::endl;
 
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");

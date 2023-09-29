@@ -13,7 +13,7 @@ fi
 # if hostname is tesla then datasetFolder is /media/extra/slam_net/datasets/TUM/
 # else datasetFolder is /media/scratch/
 if [[ $(hostname) == "tesla" ]]; then
-  datasetFolder=/media/extra/slam_net/datasets/TUM/
+  datasetFolder=/media/extra/TUM/
 else
   datasetFolder=/media/scratch/
 fi

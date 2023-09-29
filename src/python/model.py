@@ -2130,29 +2130,29 @@ class MaskRCNN():
         molded_images = []
         image_metas = []
         windows = []
-	for image in images:
+        for image in images:
             # Resize image to fit the model expected size
             # TODO: move resizing to mold_image()
-	    
+        
             molded_image, window, scale, padding = utils.resize_image(
                 image,
                 min_dim=self.config.IMAGE_MIN_DIM,
                 max_dim=self.config.IMAGE_MAX_DIM,
                 padding=self.config.IMAGE_PADDING)
             molded_image = mold_image(molded_image, self.config)
-	    # Build image_meta
+            # Build image_meta
             image_meta = compose_image_meta(
                 0, image.shape, window, 
                 np.zeros([self.config.NUM_CLASSES], dtype=np.int32))
-	    # Append
+            # Append
             molded_images.append(molded_image)
             windows.append(window)
             image_metas.append(image_meta)    
-        # Pack into arrays
-        molded_images = np.stack(molded_images)
-        image_metas = np.stack(image_metas)
-        windows = np.stack(windows)	
-        return molded_images, image_metas, windows
+            # Pack into arrays
+            molded_images = np.stack(molded_images)
+            image_metas = np.stack(image_metas)
+            windows = np.stack(windows)	
+            return molded_images, image_metas, windows
 
     def unmold_detections(self, detections, mrcnn_mask, image_shape, window):
         """Reformats the detections of one image from the format of the neural
@@ -2224,28 +2224,28 @@ class MaskRCNN():
         scores: [N] float probability scores for the class IDs
         masks: [H, W, N] instance binary masks
         """
-	assert self.mode == "inference", "Create model in inference mode."
+        assert self.mode == "inference", "Create model in inference mode."
         assert len(images) == self.config.BATCH_SIZE, "len(images) must be equal to BATCH_SIZE"
-	
+    
         if verbose: 
             log("Processing {} images".format(len(images)))
             for image in images:
                 log("image", image)
-	# Mold inputs to format expected by the neural network
+        # Mold inputs to format expected by the neural network
         molded_images, image_metas, windows = self.mold_inputs(images)
-	if verbose:
+        if verbose:
             log("molded_images", molded_images)
             log("image_metas", image_metas)
         # Run object detection
         detections, mrcnn_class, mrcnn_bbox, mrcnn_mask, \
-        rois, rpn_class, rpn_bbox =\
+            rois, rpn_class, rpn_bbox =\
             self.keras_model.predict([molded_images, image_metas], verbose=0)
         # Process detections
         results = []
         for i, image in enumerate(images):
             final_rois, final_class_ids, final_scores, final_masks =\
                 self.unmold_detections(detections[i], mrcnn_mask[i],
-                                       image.shape, windows[i])
+                                    image.shape, windows[i])
             results.append({
                 "rois": final_rois,
                 "class_ids": final_class_ids,
